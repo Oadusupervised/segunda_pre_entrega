@@ -7,14 +7,21 @@ export const schemaCarts = new mongoose.Schema({
         type: [
             {
                 product: {
-                    type: Schema.Types.ObjectId, // este Schema estaba en minusculas en la diapo, ojo, va en mayúsculas!
+                    type: Schema.Types.ObjectId,
                     ref: 'product'
                 }
             }
         ],
-        default: [], // este default faltaba en la diapositiva, ojo!
+        default: [], 
     },
 },{versionKey:false})
+
+
+/*schemaCarts.pre(/^find/, function (next) {
+    this.populate("nombreProducts.product");
+    next();
+  });
+  */
 
 schemaCarts.plugin(mongoosePagine)
 export const cartModel = mongoose.model('carts',schemaCarts)

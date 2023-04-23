@@ -1,9 +1,14 @@
 import { cartModel } from '../models/carts.js';
 import { messageModel } from '../models/messages.js';
-import { productModel } from '../Managers/ProductManager.js';
 import { Router } from 'express'
-import { productOperator } from '../models/products.js';
+import { productModel } from '../models/products.js';
 import { postProductController } from '../controllers/postProductController.js';
+import { profileView } from '../controllers/web/perfil.controller.js';
+import { loginView } from '../controllers/web/login.controller.js';
+import { registroView } from '../controllers/web/registro.controller.js';
+import {soloAutenticados} from '../middlewares/autenticacionWeb.js'
+import {postMessagesController} from '../controllers/postMessagesController.js'
+import {postCartsController} from '../controllers/postCartsController.js'
 
 export const routerVistas = Router()
 
@@ -91,7 +96,7 @@ routerVistas.get('/realTimeProducts', async (req, res, next) => {
     };
 
     // @ts-ignore
-    let result = await productOperator.paginate(criterioDeBusqueda, opcionesDePaginacion);
+    let result = await productModel.paginate(criterioDeBusqueda, opcionesDePaginacion);
 
     console.log(result);
 
@@ -116,7 +121,20 @@ routerVistas.get('/realTimeProducts', async (req, res, next) => {
     res.render('realTimeProducts', context);
 });
 
+
+routerVistas.get('/register', registroView)
+
+routerVistas.get('/login',loginView)
+
+routerVistas.get('/profile',soloAutenticados,profileView)
+
 routerVistas.post('/realTimeProducts', postProductController)
+
+routerVistas.post('/realTimeMessages', postMessagesController)
+
+routerVistas.post('/realTimeCarts', postCartsController)
+
+
 process.on('exit', async () => {
     //await productModel.deleteMany({});
     await cartModel.deleteMany({});

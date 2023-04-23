@@ -1,5 +1,9 @@
-<pre>//{{json this}}</pre>
-
+<h1>realTimeMessages</h1>
+<form id="cargaCarts">
+<label for="id">id</label><input id="inputId" name="id" type="text">
+<label for="id_del_producto">id_del_producto</label><input id="inputId_del_producto" name="id_del_producto" type="text">
+<button type="submit" id="btnEnviar3">enviar</button>
+</form>
 {{#if hayDocs}}
 <ul>
   {{#each docs}}
@@ -19,6 +23,12 @@ Página: <input type="text"> <button onclick="irAPag({{limit}})">ir</button>
 <script>
   function irAPag(limit) {
     const pagDeseada = document.querySelector('input').value || 1
-    window.location = `/?limit=${limit}&page=${pagDeseada}`
+    window.location = `/views/realTimeCarts/?limit=${limit}&page=${pagDeseada}`
   }
 </script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"
+    integrity="sha512-RNLkV3d+aLtfcpEyFG8jRbnWHxUqVZozacROI4J2F1sTaDqo1dPQYs01OMi1t1w9Y2FdbSCDSQ2ZVdAC8bzgAg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="/js/cargaCarts.js"></script>

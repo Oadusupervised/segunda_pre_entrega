@@ -14,4 +14,4 @@ export const schemaProducts = new mongoose.Schema({
   }, { versionKey: false });
 
   schemaProducts.plugin(mongoosePagine)
-  export const productOperator =  mongoose.model("products", schemaProducts);
+  export const productModel =  mongoose.model("products", schemaProducts);

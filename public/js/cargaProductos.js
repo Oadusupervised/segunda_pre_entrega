@@ -24,15 +24,15 @@ if (formCargaProducts instanceof HTMLFormElement) {
       ) {
   
         const datosUsuario = {
-            Id: inputId.value,
-            Title: inputTitle.value,
-            Description: inputDescription.value,
-            Code: inputCode.value,
-            Price: inputPrice.value,
-            Stock: inputStock.value,
-            Category: inputCategory.value,
-            Status: inputStatus.value,
-            Thumbnails: inputThumbnails.value,
+          title: inputTitle.value,
+          description: inputDescription.value,
+          code: inputCode.value,
+          price: inputPrice.value,
+          stock: inputStock.value,
+          category: inputCategory.value,
+          thumbnails: inputThumbnails.value,
+          id: inputId.value,
+          status: inputStatus.value,
         }
   
         const usuarioCreado = await fetch('/views/realTimeProducts', {

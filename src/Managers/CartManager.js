@@ -1,101 +1,101 @@
-import fs from 'fs/promises'
-import { cartModel } from '../models/carts.js'
 import mongoose from 'mongoose'
-import mongoosePagine from 'mongoose-paginate-v2'
+import {schemaCarts} from '../models/carts.js'
 
- export class CartManager {
-  #productos;
+export  class CartManager{
+  #cartsDb;
   constructor() {
-    cartModel.find({}, (err, carts) => {
-      if (err) {
-        console.error(err);
-      } else {
-        this.#productos = carts;
-        console.log('Productos cargados correctamente:', this.#productos);
-      }
-    }).lean();
+    this.#cartsDb = mongoose.model("carts", schemaCarts);
   }
 
-    async guardarCarrito(productos) {
-        const carrito= new this.#productos(productos)
-        await carrito.save()
-        return carrito    
+  async addCart(cart) {
+    const cartsave = await this.#cartsDb.create({
+      _id: cart.id,
+      nombreProducts: cart.nombreProducts
+    });
+    return cartsave;
+  }
+  
+  async getProductsInCartById(id) {
+    const cart = await this.#cartsDb.findOne({ _id: id }).lean();
+    if (!cart) {
+      throw new Error("Not Found");
     }
-
-    async mostrarCarrito(lim) {
-        const carritos = await this.#productos.find().limit(lim)
-        return carritos
-      }
-      
-
-    async buscarCosas() {
-        //const carritos = await this.#productos.find().lean()
-        //return carritos
-        this.#productos
+    return cart;
+  }
+  
+  async addProductInCart(cid, pid) {
+    const cart = await this.#cartsDb.findOne({ _id: cid });
+    if (!cart) {
+      throw new Error("Not Found");
     }
-
-    /*async buscarCaractProducto(idProduct) {
-        const producto = await this.#productosManager.findById(idProduct).lean()
-        if (!producto) {
-            throw new Error('id no encontrado')
-        }else{
-            return producto.title
-        }
+    const serchprod = cart.nombreProducts.find(
+        //@ts-ignore
+      (p) => p._id.toString() === pid
+    );
+    if (!serchprod) {
+        //@ts-ignore
+      cart.nombreProducts.push({ product: pid, quantity: 1 });
+    } else {
+        //@ts-ignore
+      serchprod.quantity++;
     }
-*/
-    async buscarCarritoSegunId(idCarrito) {
-        const buscada = this.#productos.findById(idCarrito).lean()
-        if (!buscada) {
-            throw new Error('id no encontrado')
-        }else{
-        return buscada
-        }
+    await cart.save();
+    return serchprod;
+  }
+  
+  async delProductInCart(cid, pid) {
+    const cart = await this.#cartsDb.findOne({ _id: cid });
+    if (!cart) {
+      throw new Error("Not Found");
     }
-
-    async reemplazarProductosdeCarrito(id, nuevaproductos) {
-        const carrito = await this.#productos.findOneAndUpdate(
-            { id: id },
-            { nombreProducts: nuevaproductos },
-            { new: true }
-        ).exec()
-    
-        if (!carrito) {
-            throw new Error('id no encontrado')
-        }
-    
-        return carrito.nombreProducts
+    const deleter = cart.nombreProducts.filter(
+        //@ts-ignore
+      (p) => p._id.toString() !== pid
+    );
+    cart.nombreProducts = deleter;
+    await cart.save();
+    return deleter;
+  }
+  
+  async updateCart(cid, updcart) {
+    const cart = await this.#cartsDb.findOne({ _id: cid });
+    if (!cart) {
+      throw new Error("Not Found");
     }
-    
-
-    async borrarCarritoSegunId(id) {
-        const carritoBorrado = await this.#productos.findByIdAndDelete(id).lean()
-        if (!carritoBorrado) {
-          throw new Error('id no encontrado');
-        }
-        return carritoBorrado;
-      }
-
-      async borrarProductoDelCarrito(cid, pid) {
-        const carritoActualizado = await this.#productos.findByIdAndUpdate(cid, {
-          $pull: {
-            productos: {
-              _id: pid
-            }
-          }
-        }, { new: true }).lean();
-        
-        if (!carritoActualizado) {
-          throw new Error('El carrito no fue encontrado');
-        }
-        
-        return carritoActualizado;
-      }
-
-      
-    async reset() {
-        await this.#productos.deleteMany({})
-      }
-      
+    cart.nombreProducts = updcart;
+    await cart.save();
+  }
+  
+  async updProductinCart(cid, pid, updquantity) {
+    const cart = await this.#cartsDb.findOne({ _id: cid });
+    if (!cart) {
+      throw new Error("Not Found");
+    }
+    const serchprod = cart.nombreProducts.find(
+        //@ts-ignore
+      (p) => p._id.toString() === pid
+    );
+    if (!serchprod) {
+      throw new Error("Not Found");
+    }
+    if (isNaN(updquantity) || updquantity < 0) {
+      throw new Error("Invalid Quantity");
+    }
+      //@ts-ignore
+    serchprod.quantity = updquantity;
+    await cart.save();
+  }
+  
+  async delAllProductsInCart(cid) {
+    const cart = await this.#cartsDb.findOne({ _id: cid });
+    if (!cart) {
+      throw new Error("Not Found");
+    }
+    cart.nombreProducts = [];
+    await cart.save();
+    return cart;
+  }
+  
 }
 
 export const cartManager = new CartManager()

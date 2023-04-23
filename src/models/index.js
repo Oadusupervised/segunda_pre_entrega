@@ -9,8 +9,3 @@ export async function conectar(){
 
 
 
-export { cartModel } from './carts.js'
-export { messageModel } from './messages.js'
-//export {productModel} from './products.js'
-
-
