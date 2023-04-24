@@ -2,16 +2,27 @@
 <form id="cargaCarts">
 <label for="id">id</label><input id="inputId" name="id" type="text">
 <label for="id_del_producto">id_del_producto</label><input id="inputId_del_producto" name="id_del_producto" type="text">
+<label for="cantidad">cantidad</label><input id="inputCantidad" name="cantidad" type="number">
 <button type="submit" id="btnEnviar3">enviar</button>
 </form>
+
 {{#if hayDocs}}
-<ul>
+<div class="carritos-container">
   {{#each docs}}
-  <li>id: {{this.id}}| nombreProducts:{{this.nombreProducts}}</li>
+  <div class="carrito">
+    <p><strong>ID:</strong> {{this.id}}</p>
+    <p><strong>Productos:</strong></p>
+    <ul>
+      {{#each this.nombreProducts}}
+      <li>{{this.product.name}} (cantidad: {{this.quantity}})</li>
+      {{/each}}
+    </ul>
+  </div>
+  <hr>
   {{/each}}
-</ul>
+</div>
 {{else}}
-array vacio...
+<p>Array vacío...</p>
 {{/if}}
 
 

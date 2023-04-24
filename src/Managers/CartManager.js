@@ -1,10 +1,14 @@
 import mongoose from 'mongoose'
 import {schemaCarts} from '../models/carts.js'
+import {schemaProducts} from '../models/products.js'
 
 export  class CartManager{
-  #cartsDb;
+  #cartsDb
+  #productsDb
   constructor() {
-    this.#cartsDb = mongoose.model("carts", schemaCarts);
+    this.#cartsDb = mongoose.model("carts", schemaCarts)
+    this.#productsDb = mongoose.model("products", schemaProducts);
+
   }
 
   async addCart(cart) {
@@ -24,37 +28,45 @@ export  class CartManager{
   }
   
   async addProductInCart(cid, pid) {
-    const cart = await this.#cartsDb.findOne({ _id: cid });
-    if (!cart) {
-      throw new Error("Not Found");
+    const product = await this.#productsDb.findById(pid);
+    if (!product) {
+      return "Product not found";
     }
-    const serchprod = cart.nombreProducts.find(
-        //@ts-ignore
-      (p) => p._id.toString() === pid
+  
+    const updatedCart = await this.#cartsDb.findOneAndUpdate(
+      { _id: cid, "nombreProducts.id": { $ne: pid } }, // no actualizar si el producto ya existe
+      { $push: { nombreProducts: { id: pid, quantity: 1 } } },
+      { new: true }
     );
-    if (!serchprod) {
-        //@ts-ignore
-      cart.nombreProducts.push({ product: pid, quantity: 1 });
-    } else {
-        //@ts-ignore
-      serchprod.quantity++;
+  
+    if (!updatedCart) { // si no se actualizó significa que el producto ya existe en el carrito
+      await this.#cartsDb.findOneAndUpdate(
+        { _id: cid, "nombreProducts.id": pid },
+        { $inc: { "nombreProducts.$.quantity": 1 } }
+      );
     }
-    await cart.save();
-    return serchprod;
+    return product
   }
   
-  async delProductInCart(cid, pid) {
-    const cart = await this.#cartsDb.findOne({ _id: cid });
-    if (!cart) {
-      throw new Error("Not Found");
+  
+  async  delProductInCart(cid, pid) {
+    try {
+      const cart = await this.#cartsDb.findOne({ _id: cid });
+  
+      if (!cart) {
+        throw new Error("Not Found");
+      }
+  
+      const result = await this.#cartsDb.findOneAndUpdate(
+        { _id: cid },
+        { $pull: { nombreProducts: { product: pid } } },
+        { new: true }
+      );
+      //@ts-ignore
+      return result.nombreProducts;
+    } catch (error) {
+      throw new Error(error.message);
     }
-    const deleter = cart.nombreProducts.filter(
-        //@ts-ignore
-      (p) => p._id.toString() !== pid
-    );
-    cart.nombreProducts = deleter;
-    await cart.save();
-    return deleter;
   }
   
   async updateCart(cid, updcart) {
@@ -62,29 +74,42 @@ export  class CartManager{
     if (!cart) {
       throw new Error("Not Found");
     }
-    cart.nombreProducts = updcart;
+    cart.nombreProducts[0].product = updcart;
     await cart.save();
   }
   
-  async updProductinCart(cid, pid, updquantity) {
-    const cart = await this.#cartsDb.findOne({ _id: cid });
-    if (!cart) {
-      throw new Error("Not Found");
+  async  updProductinCart(cid, pid, updquantity) {
+    try {
+      const cart = await this.#cartsDb.findOne({ _id: cid });
+      if (!cart) {
+        throw new Error("Not Found");
+      }
+  
+      const result = await this.#cartsDb.findOneAndUpdate(
+        {
+          _id: cid,
+          "nombreProducts.product": pid
+        },
+        {
+          $set: {
+            "nombreProducts.$.quantity": updquantity
+          }
+        },
+        {
+          new: true
+        }
+      );
+  
+      if (!result) {
+        throw new Error("Not Found");
+      }
+  
+      return result.nombreProducts;
+    } catch (error) {
+      throw new Error(error.message);
     }
-    const serchprod = cart.nombreProducts.find(
-        //@ts-ignore
-      (p) => p._id.toString() === pid
-    );
-    if (!serchprod) {
-      throw new Error("Not Found");
-    }
-    if (isNaN(updquantity) || updquantity < 0) {
-      throw new Error("Invalid Quantity");
-    }
-      //@ts-ignore
-    serchprod.quantity = updquantity;
-    await cart.save();
   }
+  
   
   async delAllProductsInCart(cid) {
     const cart = await this.#cartsDb.findOne({ _id: cid });

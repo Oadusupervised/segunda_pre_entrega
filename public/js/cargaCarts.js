@@ -4,16 +4,21 @@ if (formCargaCarts instanceof HTMLFormElement) {
       event.preventDefault();
       const inputId = document.querySelector('#inputId')
       const inputId_del_producto = document.querySelector('#inputId_del_producto')
+      const inputCantidad = document.querySelector('#inputCantidad')
+
 
       if (
         inputId instanceof HTMLInputElement &&
-        inputId_del_producto instanceof HTMLInputElement
+        inputId_del_producto instanceof HTMLInputElement&&
+        inputCantidad instanceof HTMLInputElement
       ) {
   
         const datosUsuario = {
           id: inputId.value,
           nombreProducts: [
-            {product:inputId_del_producto.value}]
+            {product:inputId_del_producto.value},
+            {quantity:inputCantidad.value}
+          ]
         }
   
         const carritoCreado = await fetch('/views/realTimeCarts', {
