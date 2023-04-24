@@ -1,5 +1,7 @@
 # segunda_pre_entrega
 
+para acceder como admin: adminSupremo@coderhouse.com y contra: 123
+
 en este segunad pre entrega se cumplen los siguientes parametros:
 
 Con base en nuestra implementación actual de productos, modificar el método GET / para que cumpla con los siguientes puntos:
